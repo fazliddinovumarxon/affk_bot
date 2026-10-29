@@ -1,36 +1,41 @@
-const express = require('express');
 const mineflayer = require('mineflayer');
+const express = require('express');
 
-// Render o'chib qolmasligi uchun kichik Web Server
 const app = express();
-app.get('/', (req, res) => res.send('Bot 24/7 ishlamoqda!'));
-app.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
 
-// Minecraft Bot sozlamalari
+// Render'ın uyumasını önlemek için Web Sunucusu
+app.get('/', (req, res) => {
+  res.send('AFK Bot aktif ve çalışıyor!');
+});
+
+app.listen(PORT, () => {
+  console.log(`Web sunucusu ${PORT} portunda çalışıyor.`);
+});
+
+// Bot Yapılandırması
+const botOptions = {
+  host: 'survival-mj32.aternos.me', // Aternos IP adresinizi yazın
+  port: 57148,                             // Sunucu portunuz
+  username: 'AFK_Bot_724',                // Botun oyundaki adı
+  version: '1.21.11'                       // Minecraft versiyonunuz
+};
+
 function createBot() {
-  const bot = mineflayer.createBot({
-    host: 'survival-mj32.aternos.me', // Aternos IP- manzilingiz
-    port: 57148,                  // Serveringiz porti (agar bo'lsa)
-    username: 'afk_Donut',       // Botning Minecraft'dagi nikini kiriting
-    version: '1.20.1'             // Server versiyasi
-  });
+  const bot = mineflayer.createBot(botOptions);
 
   bot.on('spawn', () => {
-    console.log("Bot serverga kirdi!");
-    // AFK bo'lib qolmaslik uchun har 30 sekundda bir sakraydi
-    setInterval(() => {
-      bot.setControlState('jump', true);
-      setTimeout(() => bot.setControlState('jump', false), 500);
-    }, 30000);
+    console.log('Bot sunucuya başarıyla bağlandı!');
   });
 
-  // Server o'chsa yoki bot uzilsa, avtomatik qayta ulanadi
   bot.on('end', () => {
-    console.log("Bot uzildi, 10 sekunddan keyin qayta ulanadi...");
-    setTimeout(createBot, 10000);
+    console.log('Bot sunucudan ayrıldı. 30 saniye içinde tekrar bağlanılıyor...');
+    setTimeout(createBot, 30000);
   });
 
-  bot.on('error', err => console.log('Xatolik:', err));
+  bot.on('error', (err) => {
+    console.log('Hata oluştu:', err);
+  });
 }
 
 createBot();
